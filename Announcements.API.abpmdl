@@ -1,0 +1,55 @@
+{
+  "template": "app-nolayers",
+  "imports": {
+    "Volo.Abp.LeptonXLiteTheme": {
+      "version": "5.4.1",
+      "isInstalled": true,
+      "creationTime": "07/12/2026 21:29:24 +00:00"
+    },
+    "Volo.Abp.Account": {
+      "version": "10.4.1",
+      "isInstalled": true,
+      "creationTime": "07/12/2026 21:29:24 +00:00"
+    },
+    "Volo.Abp.OpenIddict": {
+      "version": "10.4.1",
+      "isInstalled": true,
+      "creationTime": "07/12/2026 21:29:24 +00:00"
+    },
+    "Volo.Abp.Identity": {
+      "version": "10.4.1",
+      "isInstalled": true,
+      "creationTime": "07/12/2026 21:29:24 +00:00"
+    },
+    "Volo.Abp.TenantManagement": {
+      "version": "10.4.1",
+      "isInstalled": true,
+      "creationTime": "07/12/2026 21:29:24 +00:00"
+    },
+    "Volo.Abp.SettingManagement": {
+      "version": "10.4.1",
+      "isInstalled": true,
+      "creationTime": "07/12/2026 21:29:24 +00:00"
+    },
+    "Volo.Abp.PermissionManagement": {
+      "version": "10.4.1",
+      "isInstalled": true,
+      "creationTime": "07/12/2026 21:29:24 +00:00"
+    },
+    "Volo.Abp.FeatureManagement": {
+      "version": "10.4.1",
+      "isInstalled": true,
+      "creationTime": "07/12/2026 21:29:24 +00:00"
+    },
+    "Volo.Abp.BlobStoring.Database": {
+      "version": "10.4.1",
+      "isInstalled": true,
+      "creationTime": "07/12/2026 21:29:24 +00:00"
+    }
+  },
+  "packages": {
+    "Announcements.API": {
+      "path": "Announcements.API/Announcements.API.abppkg"
+    }
+  }
+}
