@@ -122,6 +122,11 @@
     <Content Remove="$(UserProfile)\.nuget\packages\*\*\contentFiles\any\*\*.abppkg*" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Services\Discord\" />
+    <Folder Include="Services\AI\" />
+  </ItemGroup>
+
 
 
 </Project>
