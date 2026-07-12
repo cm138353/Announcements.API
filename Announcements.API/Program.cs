@@ -1,7 +1,8 @@
-using System;
 using Announcements.API.Data;
+using Announcements.API.Services.AI;
 using Serilog;
 using Serilog.Events;
+using System;
 using Volo.Abp.Data;
 
 namespace Announcements.API;
@@ -43,6 +44,10 @@ public class Program
             {
                 builder.Services.AddDataMigrationEnvironment();
             }
+            
+            builder.Services.Configure<OpenAiOptions>(builder.Configuration.GetSection(OpenAiOptions.SectionName));
+            builder.Services.AddHttpClient<IOpenAiService, OpenAiService>();
+
             await builder.AddApplicationAsync<APIModule>();
             var app = builder.Build();
             await app.InitializeApplicationAsync();

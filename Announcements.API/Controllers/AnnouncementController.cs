@@ -13,8 +13,7 @@ public class AnnouncementController : AbpController
 {
     private readonly IAnnouncementAppService _announcementAppService;
 
-    public AnnouncementController(
-        IAnnouncementAppService announcementAppService)
+    public AnnouncementController(IAnnouncementAppService announcementAppService)
     {
         _announcementAppService = announcementAppService;
     }

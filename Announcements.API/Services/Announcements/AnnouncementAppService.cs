@@ -1,4 +1,6 @@
 ﻿using Announcements.API.Entities.Announcements;
+using Announcements.API.Services.AI;
+using Announcements.API.Services.Discord;
 using Announcements.API.Services.Dtos;
 using Volo.Abp.Domain.Repositories;
 
@@ -6,8 +8,19 @@ namespace Announcements.API.Services.Announcements
 {
     public class AnnouncementAppService : APIAppService, IAnnouncementAppService
     {
-        public IRepository<Announcement, Guid> AnnouncementRepository { get; set; }
-        public AnnouncementAppService() { }
+        private readonly IRepository<Announcement, Guid> _announcementRepository;
+        private readonly IOpenAiService _openAiService;
+        private readonly IDiscordService _discordService;
+
+        public AnnouncementAppService(
+            IRepository<Announcement, Guid> announcementRepository,
+            IOpenAiService openAiService,
+            IDiscordService discordService)
+        {
+            _announcementRepository = announcementRepository;
+            _openAiService = openAiService;
+            _discordService = discordService;
+        }
 
         public Task<AnnouncementDto> CreateAsync(CreateAnnouncementDto input)
         {

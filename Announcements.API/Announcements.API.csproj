@@ -123,8 +123,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Services\Discord\" />
-    <Folder Include="Services\AI\" />
+    <Folder Include="Services\AI\Models\" />
+    <Folder Include="Services\AI\Prompts\" />
   </ItemGroup>
 
 

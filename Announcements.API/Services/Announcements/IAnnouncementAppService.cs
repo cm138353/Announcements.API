@@ -1,8 +1,9 @@
 ﻿using Announcements.API.Services.Dtos;
+using Volo.Abp.Application.Services;
 
 namespace Announcements.API.Services.Announcements
 {
-    public interface IAnnouncementAppService 
+    public interface IAnnouncementAppService : IApplicationService
     {
         Task<AnnouncementDto> CreateAsync(CreateAnnouncementDto input);
         Task<GenerateAnnouncementResultDto> GenerateAsync(Guid id);
