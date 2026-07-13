@@ -10,14 +10,17 @@ using Volo.Abp.OpenIddict.EntityFrameworkCore;
 using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
+using Announcements.API.Entities.Announcements;
 
 namespace Announcements.API.Data;
 
 public class APIDbContext : AbpDbContext<APIDbContext>
 {
 
-    public const string DbTablePrefix = "App";
-    public const string DbSchema = null;
+    public const string DbSchema = "app";
+
+    public DbSet<Announcement> Announcements { get; set; }
+
 
     public APIDbContext(DbContextOptions<APIDbContext> options)
         : base(options)
@@ -41,6 +44,41 @@ public class APIDbContext : AbpDbContext<APIDbContext>
         builder.ConfigureTenantManagement();
 
         /* Configure your own entities here */
-    }
+
+        builder.Entity<Announcement>(entity =>
+        {
+            entity.ToTable("Announcements", DbSchema);
+
+            entity.ConfigureByConvention();
+
+            entity.Property(x => x.Title)
+                .IsRequired()
+                .HasMaxLength(200);
+
+            entity.Property(x => x.RoughNotes)
+                .IsRequired()
+                .HasMaxLength(4000);
+
+            entity.Property(x => x.DiscordContent)
+                .HasMaxLength(4000);
+
+            entity.Property(x => x.ClanMailContent)
+                .HasMaxLength(256);
+
+            entity.Property(x => x.ClanChatContent)
+                .HasMaxLength(128);
+
+            entity.Property(x => x.Tone)
+                .IsRequired();
+
+            entity.Property(x => x.EventType)
+                .IsRequired();
+
+            entity.Property(x => x.Status)
+                .IsRequired();
+
+            entity.HasIndex(x => x.CreationTime);
+        });
+    } 
 }
 

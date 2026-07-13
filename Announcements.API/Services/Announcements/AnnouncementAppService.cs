@@ -22,18 +22,9 @@ namespace Announcements.API.Services.Announcements
             _discordService = discordService;
         }
 
-        public Task<AnnouncementDto> CreateAsync(CreateAnnouncementDto input)
+        public Task<AnnouncementDto> GenerateAsync(CreateAnnouncementDto input)
         {
-            throw new NotImplementedException();
-        }
 
-        public Task DeleteAsync(Guid id)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<GenerateAnnouncementResultDto> GenerateAsync(Guid id)
-        {
             throw new NotImplementedException();
         }
 
@@ -47,12 +38,7 @@ namespace Announcements.API.Services.Announcements
             throw new NotImplementedException();
         }
 
-        public Task<PublishAnnouncementDto> PublishAsync(Guid id, PublishAnnouncementDto input)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<AnnouncementDto> UpdateAsync(Guid id, UpdateAnnouncementDto input)
+        public Task<AnnouncementDto> PublishAsync(Guid id, PublishAnnouncementDto input)
         {
             throw new NotImplementedException();
         }

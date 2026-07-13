@@ -18,35 +18,19 @@ public class AnnouncementController : AbpController
         _announcementAppService = announcementAppService;
     }
 
-    [HttpPost]
-    public Task<AnnouncementDto> CreateAsync(
+    [HttpPost("generate")]
+    public Task<AnnouncementDto> GenerateAsync(
         [FromBody] CreateAnnouncementDto input)
     {
-        return _announcementAppService.CreateAsync(input);
-    }
-
-    [HttpPost("{id:guid}/generate")]
-    public Task<GenerateAnnouncementResultDto> GenerateAsync(Guid id)
-    {
-        return _announcementAppService.GenerateAsync(id);
-    }
-
-    [HttpPut("{id:guid}")]
-    public Task<AnnouncementDto> UpdateAsync(Guid id,[FromBody] UpdateAnnouncementDto input)
-    {
-        return _announcementAppService.UpdateAsync(id, input);
+        return _announcementAppService.GenerateAsync(input);
     }
 
     [HttpPost("{id:guid}/publish")]
-    public Task PublishAsync(Guid id, [FromBody] PublishAnnouncementDto input)
+    public Task<AnnouncementDto> PublishAsync(
+        Guid id,
+        [FromBody] PublishAnnouncementDto input)
     {
         return _announcementAppService.PublishAsync(id, input);
-    }
-
-    [HttpGet("{id:guid}")]
-    public Task<AnnouncementDto> GetAsync(Guid id)
-    {
-        return _announcementAppService.GetAsync(id);
     }
 
     [HttpGet]
@@ -55,9 +39,9 @@ public class AnnouncementController : AbpController
         return _announcementAppService.GetListAsync();
     }
 
-    [HttpDelete("{id:guid}")]
-    public Task DeleteAsync(Guid id)
+    [HttpGet("{id:guid}")]
+    public Task<AnnouncementDto> GetAsync(Guid id)
     {
-        return _announcementAppService.DeleteAsync(id);
+        return _announcementAppService.GetAsync(id);
     }
 }
