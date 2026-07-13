@@ -22,10 +22,38 @@ namespace Announcements.API.Services.Announcements
             _discordService = discordService;
         }
 
-        public Task<AnnouncementDto> GenerateAsync(CreateAnnouncementDto input)
+        public async Task<AnnouncementDto> GenerateAsync(
+            CreateAnnouncementDto input)
         {
+            var announcement = new Announcement
+            {
+                Title = input.Title,
+                EventType = input.EventType,
+                EventDate = input.EventDate,
+                Tone = input.Tone,
+                RoughNotes = input.RoughNotes,
+                Status = AnnouncementStatus.Draft
+            };
 
-            throw new NotImplementedException();
+            var generatedContent =
+                await _openAiService.GenerateAsync(announcement);
+
+            announcement.DiscordContent =
+                generatedContent.DiscordContent;
+
+            announcement.ClanMailContent =
+                generatedContent.ClanMailContent;
+
+            announcement.ClanChatContent =
+                generatedContent.ClanChatContent;
+
+            announcement.Status = AnnouncementStatus.Generated;
+
+            await _announcementRepository.InsertAsync(
+                announcement,
+                autoSave: true);
+
+            return ObjectMapper.Map<Announcement, AnnouncementDto>(announcement);
         }
 
         public Task<AnnouncementDto> GetAsync(Guid id)
