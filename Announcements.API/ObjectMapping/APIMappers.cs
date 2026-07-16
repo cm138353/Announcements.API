@@ -1,4 +1,5 @@
 using Announcements.API.Entities.Announcements;
+using Announcements.API.Entities.Discord;
 using Announcements.API.Services.Dtos;
 using Riok.Mapperly.Abstractions;
 using Volo.Abp.Mapperly;
@@ -29,3 +30,12 @@ public partial class APIAnnouncementDtoToAnnouncementMapper : MapperBase<Announc
 
     public override partial void Map(AnnouncementDto source, Announcement destination);
 }
+
+[Mapper(RequiredMappingStrategy = RequiredMappingStrategy.Target)]
+public partial class APIDiscordConnectionToDiscordConnectionDtoMapper : MapperBase<DiscordConnection, DiscordConnectionDto>
+{
+    public override partial DiscordConnectionDto Map(DiscordConnection source);
+
+    public override partial void Map(DiscordConnection source, DiscordConnectionDto destination);
+}
+

@@ -2,9 +2,9 @@
 {
     public enum AnnouncementTone
     {
-        Professional,
-        Friendly,
-        Competitive,
-        Funny
+        Professional = 1,
+        Friendly = 2,
+        Competitive = 3,
+        Funny = 4
     }
 }

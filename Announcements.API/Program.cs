@@ -1,5 +1,6 @@
 using Announcements.API.Data;
 using Announcements.API.Services.AI;
+using Announcements.API.Services.Discord;
 using Serilog;
 using Serilog.Events;
 using System;
@@ -46,10 +47,18 @@ public class Program
             }
             
             builder.Services.Configure<OpenAiOptions>(builder.Configuration.GetSection(OpenAiOptions.SectionName));
+            builder.Services.Configure<DiscordOptions>(builder.Configuration.GetSection(DiscordOptions.SectionName));
             builder.Services.AddHttpClient<IOpenAiService, OpenAiService>();
-
+            builder.Services.AddHttpClient<IDiscordService, DiscordService>();
             await builder.AddApplicationAsync<APIModule>();
             var app = builder.Build();
+            app.Use(async (context, next) =>
+            {
+                var auth = context.Request.Headers.Authorization.ToString();
+                Console.WriteLine(auth);
+
+                await next();
+            });
             await app.InitializeApplicationAsync();
 
             if (IsMigrateDatabase(args))

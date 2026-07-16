@@ -5,14 +5,18 @@ namespace Announcements.API.Services.Announcements
 {
     public interface IAnnouncementAppService : IApplicationService
     {
-        Task<AnnouncementDto> GenerateAsync(CreateAnnouncementDto input);
-
-        Task<AnnouncementDto> PublishAsync(
-            Guid id,
-            PublishAnnouncementDto input);
-
         Task<List<AnnouncementDto>> GetListAsync();
 
         Task<AnnouncementDto> GetAsync(Guid id);
+
+        Task<AnnouncementDto> GenerateAsync(CreateAnnouncementDto input);
+
+        Task<AnnouncementDto> UpdateAsync(
+            Guid id,
+            UpdateAnnouncementDto input);
+
+        Task<AnnouncementDto> PublishAsync(Guid id);
+
+        Task DeleteAsync(Guid id);
     }
 }

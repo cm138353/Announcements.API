@@ -10,7 +10,7 @@ namespace Announcements.API.Services.Dtos
 
         public AnnouncementTone Tone { get; set; }
 
-        public DateTime? EventDate { get; set; }
+        public DateTime EventDate { get; set; }
 
         public string RoughNotes { get; set; } = string.Empty;
     }

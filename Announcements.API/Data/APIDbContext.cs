@@ -11,6 +11,7 @@ using Volo.Abp.PermissionManagement.EntityFrameworkCore;
 using Volo.Abp.SettingManagement.EntityFrameworkCore;
 using Volo.Abp.TenantManagement.EntityFrameworkCore;
 using Announcements.API.Entities.Announcements;
+using Announcements.API.Entities.Discord;
 
 namespace Announcements.API.Data;
 
@@ -20,6 +21,7 @@ public class APIDbContext : AbpDbContext<APIDbContext>
     public const string DbSchema = "app";
 
     public DbSet<Announcement> Announcements { get; set; }
+    public DbSet<DiscordConnection> DiscordConnections { get; set; }
 
 
     public APIDbContext(DbContextOptions<APIDbContext> options)
@@ -60,7 +62,7 @@ public class APIDbContext : AbpDbContext<APIDbContext>
                 .HasMaxLength(4000);
 
             entity.Property(x => x.DiscordContent)
-                .HasMaxLength(4000);
+                .HasColumnType("text");
 
             entity.Property(x => x.ClanMailContent)
                 .HasMaxLength(256);
@@ -78,6 +80,15 @@ public class APIDbContext : AbpDbContext<APIDbContext>
                 .IsRequired();
 
             entity.HasIndex(x => x.CreationTime);
+        });
+
+        builder.Entity<DiscordConnection>(b =>
+        {
+            b.ToTable("DiscordConnections");
+
+            b.ConfigureByConvention();
+
+            // configure properties here
         });
     } 
 }
