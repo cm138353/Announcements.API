@@ -22,4 +22,4 @@ COPY --from=build /app/publish .
 ENV ASPNETCORE_URLS=http://+:8080
 EXPOSE 8080
 
-ENTRYPOINT ["dotnet", "Announcements.API.dll"]
+ENTRYPOINT ["sh", "-c", "dotnet Announcements.API.dll --migrate-database && dotnet Announcements.API.dll"]
