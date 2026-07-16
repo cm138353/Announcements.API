@@ -5,6 +5,7 @@ using Localization.Resources.AbpUi;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
@@ -195,6 +196,15 @@ public class APIModule : AbpModule
         {
             options.CheckLibs = false;
         });
+        Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders =
+                ForwardedHeaders.XForwardedFor |
+                ForwardedHeaders.XForwardedProto;
+
+            options.KnownNetworks.Clear();
+            options.KnownProxies.Clear();
+        });
         if (hostingEnvironment.IsDevelopment())
         {
             context.Services.AddRazorPages()
@@ -384,6 +394,8 @@ public class APIModule : AbpModule
     {
         var app = context.GetApplicationBuilder();
         var env = context.GetEnvironment();
+        
+        app.UseForwardedHeaders();
 
         if (env.IsDevelopment())
         {
@@ -425,5 +437,10 @@ public class APIModule : AbpModule
         app.UseAuditing();
         app.UseAbpSerilogEnrichers();
         app.UseConfiguredEndpoints();
+
+        app.UseHttpsRedirection();
+
+        app.UseAuthentication();
+        app.UseAuthorization();
     }
 }
