@@ -139,18 +139,22 @@ public class APIModule : AbpModule
             });
         });
 
-        if (!hostingEnvironment.IsDevelopment())
-        {
-            PreConfigure<AbpOpenIddictAspNetCoreOptions>(options =>
-            {
-                options.AddDevelopmentEncryptionAndSigningCertificate = false;
-            });
+        //if (!hostingEnvironment.IsDevelopment())
+        //{
+        //    PreConfigure<AbpOpenIddictAspNetCoreOptions>(options =>
+        //    {
+        //        options.AddDevelopmentEncryptionAndSigningCertificate = false;
+        //    });
 
-            PreConfigure<OpenIddictServerBuilder>(serverBuilder =>
-            {
-                serverBuilder.AddProductionEncryptionAndSigningCertificate("openiddict.pfx", configuration["AuthServer:CertificatePassPhrase"]!);
-            });
-        }
+        //    PreConfigure<OpenIddictServerBuilder>(serverBuilder =>
+        //    {
+        //        serverBuilder.AddProductionEncryptionAndSigningCertificate("openiddict.pfx", configuration["AuthServer:CertificatePassPhrase"]!);
+        //    });
+        //}
+        PreConfigure<AbpOpenIddictAspNetCoreOptions>(options =>
+        {
+            options.AddDevelopmentEncryptionAndSigningCertificate = true;
+        });
 
         APIGlobalFeatureConfigurator.Configure();
         APIModuleExtensionConfigurator.Configure();
