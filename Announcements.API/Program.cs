@@ -22,7 +22,10 @@ public class Program
         try
         {
             var builder = WebApplication.CreateBuilder(args);
-            builder.Host.AddAppSettingsSecretsJson()
+            builder.Host.AddAppSettingsSecretsJson(
+                    optional: true,
+                    reloadOnChange: false
+                )
                 .UseAutofac()
                 .UseSerilog((context, services, loggerConfiguration) =>
                 {
@@ -45,7 +48,7 @@ public class Program
             {
                 builder.Services.AddDataMigrationEnvironment();
             }
-            
+
             builder.Services.Configure<OpenAiOptions>(builder.Configuration.GetSection(OpenAiOptions.SectionName));
             builder.Services.Configure<DiscordOptions>(builder.Configuration.GetSection(DiscordOptions.SectionName));
             builder.Services.AddHttpClient<IOpenAiService, OpenAiService>();
