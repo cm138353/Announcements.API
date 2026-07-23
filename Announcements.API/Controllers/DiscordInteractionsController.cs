@@ -1,9 +1,7 @@
 ﻿using Announcements.API.Services.Discord.Interactions;
 using Announcements.API.Services.Discord.Interactions.Models;
-using Announcements.API.Services.Dtos.Interactions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NSec.Cryptography;
 using System.Text;
 using System.Text.Json;
 using Volo.Abp.AspNetCore.Mvc;
@@ -15,8 +13,11 @@ namespace Announcements.API.Controllers
     [Route("api/discord/interactions")]
     public class DiscordInteractionsController : AbpController
     {
-        private const string SignatureHeaderName = "X-Signature-Ed25519";
-        private const string TimestampHeaderName = "X-Signature-Timestamp";
+        private const string SignatureHeaderName =
+            "X-Signature-Ed25519";
+
+        private const string TimestampHeaderName =
+            "X-Signature-Timestamp";
 
         private static readonly JsonSerializerOptions JsonOptions = new()
         {
@@ -72,12 +73,10 @@ namespace Announcements.API.Controllers
                 });
             }
 
-            var signatureIsValid = _signatureValidator.IsValid(
-                signature,
-                timestamp,
-                rawBody);
-
-            if (!signatureIsValid)
+            if (!_signatureValidator.IsValid(
+                    signature,
+                    timestamp,
+                    rawBody))
             {
                 _logger.LogWarning(
                     "Discord interaction request failed signature validation.");
@@ -117,19 +116,47 @@ namespace Announcements.API.Controllers
                 });
             }
 
+            if (interaction.Type == DiscordInteractionType.Ping)
+            {
+                return Ok(DiscordInteractionResponse.Pong());
+            }
+
+            if (interaction.Type !=
+                DiscordInteractionType.ApplicationCommand)
+            {
+                return Ok(
+                    DiscordInteractionResponse.EphemeralMessage(
+                        "This Discord interaction type is not supported."));
+            }
+
             try
             {
-                var response = await _interactionService.HandleAsync(
-                    interaction,
+                Response.StatusCode = StatusCodes.Status200OK;
+                Response.ContentType = "application/json";
+
+                await JsonSerializer.SerializeAsync(
+                    Response.Body,
+                    DiscordInteractionResponse.DeferredChannelMessage(),
+                    JsonOptions,
                     cancellationToken);
 
-                return Ok(response);
+                await Response.Body.FlushAsync(cancellationToken);
+
+                _logger.LogInformation(
+                    "Deferred Discord interaction {InteractionId}.",
+                    interaction.Id);
+
+                await _interactionService.ProcessDeferredAsync(
+                    interaction);
+
+                return new EmptyResult();
             }
             catch (OperationCanceledException)
                 when (cancellationToken.IsCancellationRequested)
             {
                 _logger.LogInformation(
-                    "Discord interaction request was cancelled.");
+                    "Discord interaction {InteractionId} was cancelled.",
+                    interaction.Id);
 
                 throw;
             }
@@ -137,26 +164,13 @@ namespace Announcements.API.Controllers
             {
                 _logger.LogError(
                     exception,
-                    "An unexpected error occurred while processing " +
-                    "Discord interaction {InteractionId}.",
+                    "An unexpected error occurred while processing Discord " +
+                    "interaction {InteractionId}.",
                     interaction.Id);
 
-                /*
-                 * Discord expects an interaction callback-shaped response.
-                 * Type 4 means CHANNEL_MESSAGE_WITH_SOURCE.
-                 * Flag 64 makes the error visible only to the user.
-                 */
-                return Ok(new
-                {
-                    type = 4,
-                    data = new
-                    {
-                        content =
-                            "❌ An unexpected error occurred while processing " +
-                            "the command.",
-                        flags = 64
-                    }
-                });
+                // The deferred response may already have been written.
+                // Do not attempt to write another response body.
+                return new EmptyResult();
             }
         }
 
