@@ -53,6 +53,7 @@ public class Program
             builder.Services.Configure<DiscordOptions>(builder.Configuration.GetSection(DiscordOptions.SectionName));
             builder.Services.AddHttpClient<IOpenAiService, OpenAiService>();
             builder.Services.AddHttpClient<IDiscordService, DiscordService>();
+            builder.Services.AddHttpClient<DiscordCommandRegistrationService>();
             await builder.AddApplicationAsync<APIModule>();
             var app = builder.Build();
             app.Use(async (context, next) =>
@@ -63,7 +64,16 @@ public class Program
                 await next();
             });
             await app.InitializeApplicationAsync();
+            
+            using (var scope = app.Services.CreateScope())
+            {
+                var registrationService =
+                    scope.ServiceProvider
+                        .GetRequiredService<DiscordCommandRegistrationService>();
 
+                await registrationService.RegisterGuildCommandsAsync();
+            }
+            
             if (IsMigrateDatabase(args))
             {
                 await app.Services.GetRequiredService<APIDbMigrationService>().MigrateAsync();
