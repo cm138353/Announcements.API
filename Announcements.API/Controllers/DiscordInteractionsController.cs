@@ -11,7 +11,7 @@ namespace Announcements.API.Controllers
     [ApiController]
     [AllowAnonymous]
     [Route("api/discord/interactions")]
-    public class DiscordInteractionsController : AbpController
+    public sealed class DiscordInteractionsController : AbpController
     {
         private const string SignatureHeaderName =
             "X-Signature-Ed25519";
@@ -25,16 +25,16 @@ namespace Announcements.API.Controllers
         };
 
         private readonly DiscordSignatureValidator _signatureValidator;
-        private readonly IDiscordInteractionService _interactionService;
+        private readonly IDiscordInteractionQueue _interactionQueue;
         private readonly ILogger<DiscordInteractionsController> _logger;
 
         public DiscordInteractionsController(
             DiscordSignatureValidator signatureValidator,
-            IDiscordInteractionService interactionService,
+            IDiscordInteractionQueue interactionQueue,
             ILogger<DiscordInteractionsController> logger)
         {
             _signatureValidator = signatureValidator;
-            _interactionService = interactionService;
+            _interactionQueue = interactionQueue;
             _logger = logger;
         }
 
@@ -131,25 +131,17 @@ namespace Announcements.API.Controllers
 
             try
             {
-                Response.StatusCode = StatusCodes.Status200OK;
-                Response.ContentType = "application/json";
-
-                await JsonSerializer.SerializeAsync(
-                    Response.Body,
-                    DiscordInteractionResponse.DeferredChannelMessage(),
-                    JsonOptions,
+                await _interactionQueue.EnqueueAsync(
+                    interaction,
                     cancellationToken);
 
-                await Response.Body.FlushAsync(cancellationToken);
-
                 _logger.LogInformation(
-                    "Deferred Discord interaction {InteractionId}.",
+                    "Accepted Discord interaction {InteractionId} " +
+                    "for deferred processing.",
                     interaction.Id);
 
-                await _interactionService.ProcessDeferredAsync(
-                    interaction);
-
-                return new EmptyResult();
+                return Ok(
+                    DiscordInteractionResponse.DeferredChannelMessage());
             }
             catch (OperationCanceledException)
                 when (cancellationToken.IsCancellationRequested)
@@ -164,13 +156,12 @@ namespace Announcements.API.Controllers
             {
                 _logger.LogError(
                     exception,
-                    "An unexpected error occurred while processing Discord " +
-                    "interaction {InteractionId}.",
+                    "Could not enqueue Discord interaction {InteractionId}.",
                     interaction.Id);
 
-                // The deferred response may already have been written.
-                // Do not attempt to write another response body.
-                return new EmptyResult();
+                return Ok(
+                    DiscordInteractionResponse.EphemeralMessage(
+                        "❌ The command could not be started. Please try again."));
             }
         }
 

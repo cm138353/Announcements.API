@@ -5,9 +5,7 @@ using Volo.Abp.DependencyInjection;
 
 namespace Announcements.API.BackgroundJobs.Announcements
 {
-    public sealed class GenerateAnnouncementJob :
-        AsyncBackgroundJob<GenerateAnnouncementJobArgs>,
-        ITransientDependency
+    public sealed class GenerateAnnouncementJob : AsyncBackgroundJob<GenerateAnnouncementJobArgs>, ITransientDependency
     {
         private const string FailureMessage =
             "Announcement generation failed. " +

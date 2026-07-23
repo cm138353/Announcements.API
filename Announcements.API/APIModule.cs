@@ -1,6 +1,7 @@
 using Announcements.API.Data;
 using Announcements.API.HealthChecks;
 using Announcements.API.Localization;
+using Announcements.API.Services.Discord.Interactions;
 using Localization.Resources.AbpUi;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.DataProtection;
@@ -210,8 +211,12 @@ public class APIModule : AbpModule
             context.Services.AddRazorPages()
                 .AddRazorRuntimeCompilation();
         }
+        var services = context.Services;
+
+        services.AddHostedService<DiscordInteractionWorker>();
+
     }
-    
+
 
     private void ConfigureHealthChecks(ServiceConfigurationContext context)
     {
