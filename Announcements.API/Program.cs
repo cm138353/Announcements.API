@@ -54,6 +54,7 @@ public class Program
             builder.Services.AddHttpClient<IOpenAiService, OpenAiService>();
             builder.Services.AddHttpClient<IDiscordService, DiscordService>();
             builder.Services.AddHttpClient<DiscordCommandRegistrationService>();
+            builder.Services.AddHttpClient();
             await builder.AddApplicationAsync<APIModule>();
             var app = builder.Build();
             app.Use(async (context, next) =>

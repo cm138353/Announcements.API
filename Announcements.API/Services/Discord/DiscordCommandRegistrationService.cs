@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Headers;
+﻿using Announcements.API.Entities.Announcements;
+using System.Net.Http.Headers;
 
 namespace Announcements.API.Services.Discord
 {
@@ -25,36 +26,98 @@ namespace Announcements.API.Services.Discord
             var botToken = GetRequiredSetting("Discord:BotToken");
             var guildId = GetRequiredSetting("Discord:GuildId");
 
-            var url =
+            var requestUri =
                 $"https://discord.com/api/v10/applications/{applicationId}" +
                 $"/guilds/{guildId}/commands";
 
-            using var request = new HttpRequestMessage(HttpMethod.Post, url);
+            var payload = new
+            {
+                name = "announcement",
+                description = "Create and manage announcements",
+                type = 1, // CHAT_INPUT
+
+                options = new object[]
+                {
+                    new
+                    {
+                        type = 1, // SUB_COMMAND
+                        name = "create",
+                        description = "Create a new announcement",
+
+                        options = new object[]
+                        {
+                            new
+                            {
+                                type = 3, // STRING
+                                name = "title",
+                                description = "Announcement title",
+                                required = true,
+                                max_length = 100
+                            },
+                            new
+                            {
+                                type = 3, // STRING
+                                name = "event-type",
+                                description = "Type of Clash event",
+                                required = true,
+
+                                choices = Enum
+                                    .GetNames<ClashEventType>()
+                                    .Select(value => new
+                                    {
+                                        name = FormatChoiceName(value),
+                                        value
+                                    })
+                                    .ToArray()
+                            },
+                            new
+                            {
+                                type = 3, // STRING
+                                name = "event-date",
+                                description =
+                                    "Event date in YYYY-MM-DD format",
+                                required = true,
+                                min_length = 10,
+                                max_length = 10
+                            },
+                            new
+                            {
+                                type = 3, // STRING
+                                name = "tone",
+                                description = "Announcement tone",
+                                required = true,
+
+                                choices = Enum
+                                    .GetNames<AnnouncementTone>()
+                                    .Select(value => new
+                                    {
+                                        name = FormatChoiceName(value),
+                                        value
+                                    })
+                                    .ToArray()
+                            },
+                            new
+                            {
+                                type = 3, // STRING
+                                name = "notes",
+                                description =
+                                    "Details to include in the announcement",
+                                required = true,
+                                max_length = 2000
+                            }
+                        }
+                    }
+                }
+            };
+
+            using var request = new HttpRequestMessage(
+                HttpMethod.Post,
+                requestUri);
 
             request.Headers.Authorization =
                 new AuthenticationHeaderValue("Bot", botToken);
 
-            request.Content = JsonContent.Create(new
-            {
-                name = "announcement",
-                description = "Create and manage announcements",
-                type = 1,
-                options = new object[]
-                {
-                new
-                {
-                    type = 1,
-                    name = "create",
-                    description = "Create a new announcement"
-                },
-                new
-                {
-                    type = 1,
-                    name = "help",
-                    description = "Show help for Announcement Bot"
-                }
-                }
-            });
+            request.Content = JsonContent.Create(payload);
 
             using var response = await _httpClient.SendAsync(
                 request,
@@ -66,20 +129,38 @@ namespace Announcements.API.Services.Discord
             if (!response.IsSuccessStatusCode)
             {
                 throw new InvalidOperationException(
-                    $"Discord command registration failed. " +
+                    "Discord command registration failed. " +
                     $"Status: {(int)response.StatusCode}. " +
                     $"Response: {responseBody}");
             }
 
             _logger.LogInformation(
-                "Discord guild slash commands registered successfully.");
+                "Discord guild command /announcement create " +
+                "registered successfully.");
         }
 
         private string GetRequiredSetting(string key)
         {
-            return _configuration[key]
-                ?? throw new InvalidOperationException(
+            var value = _configuration[key];
+
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                throw new InvalidOperationException(
                     $"Missing configuration setting: {key}");
+            }
+
+            return value;
+        }
+
+        private static string FormatChoiceName(string value)
+        {
+            return string.Concat(
+                value.Select((character, index) =>
+                    index > 0 &&
+                    char.IsUpper(character) &&
+                    !char.IsUpper(value[index - 1])
+                        ? $" {character}"
+                        : character.ToString()));
         }
     }
 }
