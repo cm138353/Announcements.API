@@ -1,11 +1,12 @@
 ﻿using Announcements.API.Entities.Announcements;
 using Announcements.API.Services.AI;
+using Volo.Abp.DependencyInjection;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Uow;
 
 namespace Announcements.API.Services.Discord.Announcements
 {
-    public class DiscordAnnouncementService : IDiscordAnnouncementService
+    public class DiscordAnnouncementService : IDiscordAnnouncementService, ITransientDependency
     {
         private readonly IRepository<Announcement, Guid>
             _announcementRepository;
