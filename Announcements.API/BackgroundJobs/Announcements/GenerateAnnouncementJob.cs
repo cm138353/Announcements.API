@@ -5,8 +5,14 @@ using Volo.Abp.DependencyInjection;
 
 namespace Announcements.API.BackgroundJobs.Announcements
 {
-    public class GenerateAnnouncementJob : AsyncBackgroundJob<GenerateAnnouncementJobArgs>, ITransientDependency
+    public sealed class GenerateAnnouncementJob :
+        AsyncBackgroundJob<GenerateAnnouncementJobArgs>,
+        ITransientDependency
     {
+        private const string FailureMessage =
+            "Announcement generation failed. " +
+            "Please run `/announcement create` again.";
+
         private readonly IDiscordAnnouncementService _discordAnnouncementService;
 
         private readonly IDiscordInteractionWebhookClient _discordInteractionWebhookClient;
@@ -23,19 +29,21 @@ namespace Announcements.API.BackgroundJobs.Announcements
             _logger = logger;
         }
 
-        public override async Task ExecuteAsync(GenerateAnnouncementJobArgs args)
+        public override async Task ExecuteAsync(
+            GenerateAnnouncementJobArgs args)
         {
             ArgumentNullException.ThrowIfNull(args);
 
             try
             {
-                var content = await _discordAnnouncementService.GenerateAsync(
-                    args.UserId,
-                    args.Title,
-                    args.EventType,
-                    args.EventDate,
-                    args.Tone,
-                    args.RoughNotes);
+                var content =
+                    await _discordAnnouncementService.GenerateAsync(
+                        args.UserId,
+                        args.Title,
+                        args.EventType,
+                        args.EventDate,
+                        args.Tone,
+                        args.RoughNotes);
 
                 if (string.IsNullOrWhiteSpace(content))
                 {
@@ -43,7 +51,11 @@ namespace Announcements.API.BackgroundJobs.Announcements
                         "Announcement generation returned empty content.");
                 }
 
-                await _discordInteractionWebhookClient.EditOriginalResponseAsync(args.ApplicationId,args.InteractionToken,content);
+                await _discordInteractionWebhookClient
+                    .EditOriginalResponseAsync(
+                        args.ApplicationId,
+                        args.InteractionToken,
+                        content);
             }
             catch (Exception exception)
             {
@@ -51,16 +63,17 @@ namespace Announcements.API.BackgroundJobs.Announcements
                     exception,
                     "Discord announcement generation failed. " +
                     "GuildId: {GuildId}, ChannelId: {ChannelId}, " +
-                    "UserId: {UserId}",
+                    "UserId: {UserId}, DiscordUserId: {DiscordUserId}",
                     args.GuildId,
                     args.ChannelId,
-                    args.UserId);
+                    args.UserId,
+                    args.DiscordUserId);
 
-                await SendFailureResponseAsync(args);
+                await TrySendFailureResponseAsync(args);
             }
         }
 
-        private async Task SendFailureResponseAsync(
+        private async Task TrySendFailureResponseAsync(
             GenerateAnnouncementJobArgs args)
         {
             try
@@ -69,16 +82,18 @@ namespace Announcements.API.BackgroundJobs.Announcements
                     .EditOriginalResponseAsync(
                         args.ApplicationId,
                         args.InteractionToken,
-                        "I couldn't generate the announcement. Please try again.");
+                        FailureMessage);
             }
             catch (Exception exception)
             {
                 _logger.LogError(
                     exception,
                     "Unable to send the failure response to Discord. " +
-                    "GuildId: {GuildId}, ChannelId: {ChannelId}",
+                    "GuildId: {GuildId}, ChannelId: {ChannelId}, " +
+                    "UserId: {UserId}",
                     args.GuildId,
-                    args.ChannelId);
+                    args.ChannelId,
+                    args.UserId);
             }
         }
     }
