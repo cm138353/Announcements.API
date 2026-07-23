@@ -75,7 +75,7 @@ namespace Announcements.API.Controllers
                 type = 4,
                 data = new
                 {
-                    content = "Announcement Bot received the command.",
+                    content = "✅ Slash command received successfully!",
                     flags = 64
                 }
             });
