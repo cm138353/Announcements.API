@@ -5,13 +5,17 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using System.Text.Json;
 using Volo.Abp.AspNetCore.Mvc;
+using Volo.Abp.Auditing;
+using Volo.Abp.Uow;
 
 namespace Announcements.API.Controllers
 {
     [ApiController]
     [AllowAnonymous]
+    [DisableAuditing]
+    [UnitOfWork(IsDisabled = true)]
     [Route("api/discord/interactions")]
-    public sealed class DiscordInteractionsController : AbpController
+    public class DiscordInteractionsController : AbpController
     {
         private const string SignatureHeaderName =
             "X-Signature-Ed25519";
@@ -40,7 +44,7 @@ namespace Announcements.API.Controllers
 
         [HttpPost]
         [Produces("application/json")]
-        public async Task<IActionResult> HandleAsync(
+        public virtual async Task<IActionResult> HandleAsync(
             CancellationToken cancellationToken)
         {
             var signature = Request.Headers[SignatureHeaderName]

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Volo.Abp.Uow;
 
 namespace Announcements.API.Services.Discord.Interactions
 {
@@ -30,22 +31,31 @@ namespace Announcements.API.Services.Discord.Interactions
                 try
                 {
                     var interaction =
-                        await _interactionQueue.DequeueAsync(
-                            stoppingToken);
+                        await _interactionQueue.DequeueAsync(stoppingToken);
 
                     _logger.LogInformation(
                         "Dequeued Discord interaction {InteractionId}.",
                         interaction.Id);
 
-                    using var scope =
-                        _serviceScopeFactory.CreateScope();
+                    await using var scope =
+                        _serviceScopeFactory.CreateAsyncScope();
+
+                    var unitOfWorkManager =
+                        scope.ServiceProvider
+                            .GetRequiredService<IUnitOfWorkManager>();
 
                     var interactionService =
                         scope.ServiceProvider
                             .GetRequiredService<IDiscordInteractionService>();
 
+                    using var unitOfWork = unitOfWorkManager.Begin(
+                        requiresNew: true,
+                        isTransactional: false);
+
                     await interactionService.ProcessDeferredAsync(
                         interaction);
+
+                    await unitOfWork.CompleteAsync(stoppingToken);
                 }
                 catch (OperationCanceledException)
                     when (stoppingToken.IsCancellationRequested)
@@ -60,9 +70,6 @@ namespace Announcements.API.Services.Discord.Interactions
                         "queued Discord interaction.");
                 }
             }
-
-            _logger.LogInformation(
-                "Discord interaction worker stopped.");
         }
     }
 }
